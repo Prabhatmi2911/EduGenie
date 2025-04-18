@@ -1,0 +1,100 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Global variables
+paused = False
+remaining_seconds = 0
+
+# Countdown function
+def countdown():
+    global remaining_seconds
+    if not paused and remaining_seconds >= 0:
+        mins, secs = divmod(remaining_seconds, 60)
+        time_str = f"{mins:02d}:{secs:02d}"
+        label.config(text=time_str)
+        if remaining_seconds == 0:
+            messagebox.showinfo("Timer", "Time's up!")
+        else:
+            remaining_seconds -= 1
+            root.after(1000, countdown)
+
+def start_timer():
+    global remaining_seconds, paused
+    try:
+        mins = int(min_entry.get()) if min_entry.get() else 0
+        secs = int(sec_entry.get()) if sec_entry.get() else 0
+        remaining_seconds = mins * 60 + secs
+        if remaining_seconds <= 0:
+            raise ValueError
+        paused = False
+        countdown()
+    except ValueError:
+        messagebox.showerror("Invalid Input", "Please enter valid minutes or seconds.")
+
+def pause_timer():
+    global paused
+    paused = True
+
+def resume_timer():
+    global paused
+    if paused and remaining_seconds > 0:
+        paused = False
+        countdown()
+
+def reset_timer():
+    global remaining_seconds, paused
+    paused = True
+    remaining_seconds = 0
+    label.config(text="00:00")
+    min_entry.delete(0, tk.END)
+    sec_entry.delete(0, tk.END)
+
+# GUI setup
+root = tk.Tk()
+root.title(" EduGenie Timer ")
+root.geometry("400x380")
+root.config(bg="#e8f0fe")  # soft blue background
+
+# Styles
+font_main = ("Segoe UI", 48, "bold")
+font_label = ("Segoe UI", 12)
+btn_color = "#3f51b5"
+btn_hover = "#303f9f"
+btn_fg = "white"
+entry_bg = "#ffffff"
+text_color = "#1a237e"
+
+# Timer display
+label = tk.Label(root, text="00:00", font=font_main, bg="#e8f0fe", fg=text_color)
+label.pack(pady=20)
+
+# Input frame
+frame = tk.Frame(root, bg="#e8f0fe")
+frame.pack()
+
+tk.Label(frame, text="Min:", font=font_label, bg="#e8f0fe", fg=text_color).grid(row=0, column=0, padx=5)
+min_entry = tk.Entry(frame, width=5, font=("Segoe UI", 14), justify='center', bg=entry_bg)
+min_entry.grid(row=0, column=1, padx=5)
+
+tk.Label(frame, text="Sec:", font=font_label, bg="#e8f0fe", fg=text_color).grid(row=0, column=2, padx=5)
+sec_entry = tk.Entry(frame, width=5, font=("Segoe UI", 14), justify='center', bg=entry_bg)
+sec_entry.grid(row=0, column=3, padx=5)
+
+# Button style creator
+def create_button(text, command):
+    btn = tk.Button(
+        root, text=text, command=command,
+        font=("Segoe UI", 12), bg=btn_color, fg=btn_fg,
+        activebackground=btn_hover, activeforeground="white",
+        relief="flat", width=20, height=1, cursor="hand2"
+    )
+    btn.pack(pady=4)
+    return btn
+
+# Buttons
+create_button("Start", start_timer)
+create_button("Pause", pause_timer)
+create_button("Resume", resume_timer)
+create_button("Reset", reset_timer)
+
+root.mainloop()
